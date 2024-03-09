@@ -14,25 +14,17 @@ class StasLangFrontend{
   std::ifstream input_;
   std::vector<Token> Tokens;
 
-  void Lexical_Error_Processing();
+  void LexicalErrorProcessing(bool unclosed_comment);
   
   public:
-    StasLangFrontend(const char* file_name): Lexer_{new StasyaLexClass}, Tokens() {
-      input_.open(file_name);
-      if (!input_.is_open()){
-        std::cout << "ERROR while oppening file " << file_name << std::endl;
-      }
+    StasLangFrontend(const char* file_name);
 
-      Lexer_->switch_streams(input_, std::cout);
-    };
-
-    ~StasLangFrontend(){
-      delete Lexer_;
-      if (input_.is_open()) input_.close();
-    };
+    ~StasLangFrontend();
 
     int Tokenise();
     void TokenSeqPrint();
+
+    StasLangFrontend& operator=(const StasLangFrontend&) = delete;
 };
 
 #endif

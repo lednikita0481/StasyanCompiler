@@ -1,2 +1,3 @@
 Int64_t "stRokA" position = if tRuE then initial + rate * 60 ElsE 0 --fgkhopfdjkpfg fgkhopfdjkpfg
-RTRTRTRT "str" (...) Sania Durachok (...) comment (not) inside comment (...) my comment (...) hello
+RTRTRTRT "str" (...) Sania 
+Durachok

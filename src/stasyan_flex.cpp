@@ -1,9 +1,10 @@
 #include "../include/Frontend/stasyan_lex.hpp"
+#include <cstddef>
 
-size_t StasyaLexClass::get_cur_loc(){
-  return cur_loc;
-}
+Token::Token(): token_type(TokenType::ZERO), yytext("") {};
+Token::Token(TokenType type, const char* text, size_t val = 0) : token_type(type), yytext(text), int_val(val) {};
+Token::~Token() {};
 
-size_t StasyaLexClass::get_cur_line(){
-  return cur_line;
-}
+TokenType Token::GetType() {return token_type;}
+size_t Token::GetVal() {return int_val;}
+std::string& Token::GetStr() {return yytext;}

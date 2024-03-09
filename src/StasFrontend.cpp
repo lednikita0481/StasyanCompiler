@@ -2,16 +2,33 @@
 #include <cstring>
 #include <iostream>
 
-void StasLangFrontend::Lexical_Error_Processing(){
+StasLangFrontend::StasLangFrontend(const char* file_name): Lexer_{new StasyaLexClass}, Tokens() {
+  input_.open(file_name);
+  if (!input_.is_open()){
+    std::cout << "ERROR while oppening file " << file_name << std::endl;
+  }
+
+  Lexer_->switch_streams(input_, std::cout);
+};
+
+StasLangFrontend::~StasLangFrontend(){
+  delete Lexer_;
+  if (input_.is_open()) input_.close();
+};
+
+
+void StasLangFrontend::LexicalErrorProcessing(bool unclosed_comment = false){
+  std::cout << "ERROR on line " << Lexer_->lineno() << ". ";
+
+  if (unclosed_comment){
+    std::cout << "You forgot to close the comment (...)" << std::endl;
+    return;
+  }
+
   const char* text_fault = Lexer_->YYText();
 
   if (!strcmp(".", text_fault)){
     std::cout << "May be you forgot to close long comment (...)" << std::endl;
-    return;
-  }
-
-  if (!strcmp("\"", text_fault)){
-    std::cout << "May be you forgot to close string \"" << std::endl;
     return;
   }
 
@@ -20,16 +37,27 @@ void StasLangFrontend::Lexical_Error_Processing(){
 
 int StasLangFrontend::Tokenise(){
   TokenType type = TokenType::END;
+  bool in_comment = false;
+
   while (type != TokenType::ERROR && type != TokenType::ZERO) {
     type = static_cast<TokenType>(Lexer_->yylex());
 
     if (type == TokenType::ERROR){
-      std::cout << "ERROR on line " << Lexer_->lineno() << ". ";
-      Lexical_Error_Processing();
+      LexicalErrorProcessing();
       return -1;
     }
 
-    if (type == TokenType::ZERO) return 0;
+    if (type == TokenType::COMMENT){
+      in_comment = !in_comment;
+      continue;
+    }
+
+    if (type == TokenType::ZERO) {
+      if (!in_comment) return 0;
+      
+      LexicalErrorProcessing(true);
+      return -1;
+    }
 
     size_t integer = (type != TokenType::INTEGER)? 0 : std::stoi(Lexer_->YYText());
     Tokens.push_back(Token(type, Lexer_->YYText(), integer));
@@ -76,6 +104,7 @@ static const char* enum_type_str(TokenType type){
     CASE_STR(NOT);
     CASE_STR(PRINT);
     CASE_STR(PRINTLN);
+    CASE_STR(COMMENT);
   };
 
   #undef CASE_STR
@@ -84,14 +113,14 @@ static const char* enum_type_str(TokenType type){
 
 void StasLangFrontend::TokenSeqPrint(){
   for (int i = 0; i < Tokens.size(); i++){
-    std::cout << "Token " << i << ", type: " << enum_type_str(Tokens[i].get_type());
+    std::cout << "Token " << i << ", type: " << enum_type_str(Tokens[i].GetType());
 
-    if (Tokens[i].get_type() == INTEGER) std::cout << ", int: " << Tokens[i].get_val();
+    if (Tokens[i].GetType() == INTEGER) std::cout << ", int: " << Tokens[i].GetVal();
 
-    if (Tokens[i].get_type() == STRING)    std::cout << ", str: "  << Tokens[i].get_str();
-    if (Tokens[i].get_type() == ID_TYPE)   std::cout << ", type: " << Tokens[i].get_str();
-    if (Tokens[i].get_type() == ID_OBJECT) std::cout << ", obj: "  << Tokens[i].get_str();
-    if (Tokens[i].get_type() == VARIABLE)  std::cout << ", var: "  << Tokens[i].get_str();
+    if (Tokens[i].GetType() == STRING)    std::cout << ", str: "  << Tokens[i].GetStr();
+    if (Tokens[i].GetType() == ID_TYPE)   std::cout << ", type: " << Tokens[i].GetStr();
+    if (Tokens[i].GetType() == ID_OBJECT) std::cout << ", obj: "  << Tokens[i].GetStr();
+    if (Tokens[i].GetType() == VARIABLE)  std::cout << ", var: "  << Tokens[i].GetStr();
 
     std::cout << std::endl;
   }

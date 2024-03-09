@@ -19,6 +19,7 @@ enum TokenType{
   VARIABLE,
   ERROR,
   END,
+  COMMENT,
 
   INTEGER = INT_BASE,
 
@@ -54,12 +55,14 @@ class Token{
   size_t int_val;
 
   public:
-    Token(): token_type(TokenType::ZERO), yytext("") {};
-    Token(TokenType type, const char* text, size_t val = 0) : token_type(type), yytext(text), int_val(val) {};
-    ~Token() {};
-    TokenType get_type() {return token_type;}
-    size_t get_val() {return int_val;}
-    std::string& get_str() {return yytext;}
+    Token();
+    Token(TokenType type, const char* text, size_t val);
+    ~Token();
+    TokenType GetType();
+    size_t GetVal();
+    std::string& GetStr();
+
+    Token& operator=(const Token&) = default;
 };
 
 // Я не знаю, зачем я тут наследуюсь. Поначалу показалось, что надо будет, потом оказалось, что не надо, но уверен,
@@ -72,10 +75,6 @@ class StasyaLexClass : public yyFlexLexer{
   public:
     StasyaLexClass(): cur_loc(0), cur_line(1) {};
     ~StasyaLexClass() = default;
-
-    size_t get_cur_loc();
-    size_t get_cur_line();
-
 };
 
 #endif

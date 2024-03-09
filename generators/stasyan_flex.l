@@ -3,6 +3,7 @@
 %option noinput
 %option noyywrap
 %option yylineno
+%s COMMENT_PR
 
 %{
   using std::cout;
@@ -48,7 +49,11 @@
 [ \t\n\v]+                  {}
 
 .                           {cout << "Дичь какая-то" << endl; return TokenType::ERROR;}
+
 "--"[^\n]*\n                {cout << "Тут комменты" << endl;}
-"(...)"[^"(...)"]*"(...)"   {cout << "Тут большой коммент" << endl;}
+
+<INITIAL>"(...)"            {BEGIN(COMMENT_PR); cout << "Старт большого комментария" << endl; return TokenType::COMMENT;}
+<COMMENT_PR>[^"(...)"]+     {/* eat */}
+<COMMENT_PR>"(...)"         {BEGIN(INITIAL); cout << "Конец большого комментария" << endl; return TokenType::COMMENT;}
 
 %%
